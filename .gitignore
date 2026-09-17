@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+files/input/*
+files/output/*
+
+!files/input/.gitkeep
+!files/output/.gitkeep
+
+.env
