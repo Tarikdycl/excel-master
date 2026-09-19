@@ -1,0 +1,63 @@
+{
+  "title": "Inventory Tracker",
+  "sheets": [
+    {
+      "name": "Inventory",
+      "title": "Inventory Management",
+      "rows": 100,
+      "columns": [
+        {
+          "name": "Product",
+          "type": "text",
+          "width": 24
+        },
+        {
+          "name": "SKU",
+          "type": "text",
+          "width": 16
+        },
+        {
+          "name": "Quantity",
+          "type": "integer"
+        },
+        {
+          "name": "Price",
+          "type": "currency"
+        },
+        {
+          "name": "Supplier",
+          "type": "text",
+          "width": 22
+        },
+        {
+          "name": "Status",
+          "type": "dropdown",
+          "options": [
+            "In Stock",
+            "Low Stock",
+            "Out of Stock"
+          ]
+        },
+        {
+          "name": "Inventory Value",
+          "type": "currency",
+          "formula": "=IF({Product}=\"\",\"\",{Quantity}*{Price})"
+        }
+      ],
+      "conditional_rules": [
+        {
+          "column": "Status",
+          "operator": "equal",
+          "value": "Out of Stock",
+          "style": "danger"
+        },
+        {
+          "column": "Status",
+          "operator": "equal",
+          "value": "Low Stock",
+          "style": "warning"
+        }
+      ]
+    }
+  ]
+}
