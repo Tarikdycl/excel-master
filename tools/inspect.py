@@ -15,7 +15,7 @@ def inspect_workbook(file_path: str) -> dict:
     - workbook-level metadata
     - worksheet dimensions
     - data quality information
-    - formulas
+    - formulas and formula locations
     - tables
     - charts
     - merged cells
@@ -43,6 +43,7 @@ def inspect_workbook(file_path: str) -> dict:
     report = {
         "file": path.name,
         "path": str(path.resolve()),
+        "file_size_kb": round(path.stat().st_size / 1024, 2),
         "sheet_count": len(workbook.sheetnames),
         "sheet_names": workbook.sheetnames,
         "sheets": []
@@ -60,7 +61,7 @@ def inspect_workbook(file_path: str) -> dict:
             df = pd.DataFrame()
 
         non_empty_cells = 0
-        formula_count = 0
+        formula_cells = []
 
         for row in worksheet.iter_rows():
             for cell in row:
@@ -72,7 +73,14 @@ def inspect_workbook(file_path: str) -> dict:
                     isinstance(cell.value, str)
                     and cell.value.startswith("=")
                 ):
-                    formula_count += 1
+                    formula_cells.append(
+                        {
+                            "cell": cell.coordinate,
+                            "formula": cell.value
+                        }
+                    )
+
+        formula_count = len(formula_cells)
 
         total_cells = (
             worksheet.max_row
@@ -82,6 +90,15 @@ def inspect_workbook(file_path: str) -> dict:
         empty_cells = max(
             total_cells - non_empty_cells,
             0
+        )
+
+        cell_density_percent = (
+            round(
+                (non_empty_cells / total_cells) * 100,
+                2
+            )
+            if total_cells > 0
+            else 0.0
         )
 
         merged_cells = [
@@ -142,9 +159,11 @@ def inspect_workbook(file_path: str) -> dict:
             "total_cells": total_cells,
             "non_empty_cells": non_empty_cells,
             "empty_cells": empty_cells,
+            "cell_density_percent": cell_density_percent,
 
             # Pandas / dataset information
             "data_rows": len(df),
+            "data_columns": len(df.columns),
             "columns": [
                 str(column)
                 for column in df.columns
@@ -156,6 +175,7 @@ def inspect_workbook(file_path: str) -> dict:
 
             # Excel features
             "formula_count": formula_count,
+            "formula_cells": formula_cells,
             "merged_cells": merged_cells,
             "merged_cell_count": len(
                 merged_cells
